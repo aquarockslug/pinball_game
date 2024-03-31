@@ -1,8 +1,17 @@
 {
-	"dependencies": {
-		"express": "^4.19.2",
-		"nodemon": "^3.1.0",
-		"path": "^0.12.7",
-		"phaser": "^3.80.1"
-	}
+  "name": "pinball",
+  "version": "1.0",
+  "description": "play a game of pinball",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "debug": "nodemon -w javascripts/game.js server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0",
+    "path": "^0.12.7",
+    "phaser": "^3.80.1",
+    "phaser-matter-collision-plugin": "^1.0.0"
+  }
 }
