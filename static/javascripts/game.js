@@ -24,10 +24,17 @@ class Pinball extends Phaser.Scene {
 		paddles = newPaddles(this, spritePhysics.paddle)
 	}
 	update () {
-		var leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-		var rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-		leftKey.on('down', (event) => paddles.fire.left())
-		rightKey.on('down', (event) => paddles.fire.right())
+		paddles.left.rotation = paddles.left.rotation + 0.4 
+
+		this.input.keyboard.on('keydown', (event) => event.key == "ArrowLeft" ? paddles.leftFired = true : null)
+	
+		paddles.leftFired ? paddles.fire.left() : null
+		paddles.rightFired ? paddles.fire.right() : null
+
+
+		this.input.keyboard.on('keyup', (event) =>  event.key == "ArrowLeft" ? paddles.leftFired = false : 
+							    event.key == "ArrowRight" ? paddles.rightFired = false : null)
+
 	}
 }
 
@@ -76,30 +83,29 @@ function newBall(scene) {
 
 function newPaddles(scene, shape, center = pos.paddleCenter) {
 
-	const forcePos = {x: center.x, y: center.y + 1000}
+	const forcePos = {x: center.x, y: center.y - 1000}
 	
-	function fire(paddle) {
-		scene.matter.applyForceFromPosition(paddle, forcePos, 0.1)
+	function fire(paddle, target_angle) {
+		paddle.setAngle(target_angle)
 	}
 
 	const paddles = {
-		left: scene.matter.add.sprite(0, 0, 'paddle', null, { shape, ignoreGravity: true }),
-		right: scene.matter.add.sprite(0, 0, 'paddle', null, { shape, ignoreGravity: true }),
+		left: scene.matter.add.sprite(0, 0, 'paddle', null, { shape }),
+		right: scene.matter.add.sprite(0, 0, 'paddle', null, { shape }),
 		apply: (func) => { func(paddles.left); func(paddles.right) },
-		fire: {left: () => fire(paddles.left), right: () => fire(paddles.right)}
+		fire: {left: () => fire(paddles.left, 160), right: () => fire(paddles.right, 30)},
+		leftFired: false,
+		rightFired: false
 	}
 
-	// paddles.right.setFlipX(true)
 	paddles.apply((paddle) => paddle.setScale(0.50))
-	paddles.apply((paddle) => paddle.setMass(200))
-	// paddles.apple((paddle) => paddle.setRo)
+	paddles.apply((paddle) => paddle.setMass(500))
 
-	const paddleOptions = { damping: 0.1 }
-	const pointB =  { x: 0, y: 0}
-	const leftOptions = { pointA: {x: center.x - 150, y: center.y}, pointB, ...paddleOptions}
-	const rightOptions = { pointA: {x: center.x + 150, y: center.y}, pointB, ...paddleOptions}
-	scene.matter.add.worldConstraint(paddles.left, 0, 1.0, leftOptions)
-	scene.matter.add.worldConstraint(paddles.right, 0, 1.0, rightOptions)
+	const paddleOptions = { damping: 1.0 }
+	const leftOptions = { pointA: {x: center.x - 100, y: center.y}, ...paddleOptions}
+	const rightOptions = { pointA: {x: center.x + 100, y: center.y}, ...paddleOptions}
+	scene.matter.add.worldConstraint(paddles.left, 0, 1, leftOptions)
+	scene.matter.add.worldConstraint(paddles.right, 0, 1, rightOptions)
 	return paddles
 }
 
