@@ -98,8 +98,8 @@ function newBall(scene) {
 	const ball = scene.matter.add.image(
 		pos.launch.x, pos.launch.y, 'ball'
 	);
-	ball.setScale(0.25);
-	ball.setCircle(13);
+	ball.setScale(0.35);
+	ball.setCircle(15);
 	ball.setBounce(0.75);
 	ball.setVelocity(-6.5, -20);
 	return this.ball
