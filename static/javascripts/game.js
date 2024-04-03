@@ -7,7 +7,8 @@ class Pinball extends Phaser.Scene {
 
 		this.load.image('sky', 'sky.png');
 		this.load.image('ball', 'silver_ball.png');
-		this.load.image('paddle', 'paddle.png');
+		this.load.image('paddleRight', 'paddleRight.png');
+		this.load.image('paddleLeft', 'paddleLeft.png');
 
 		this.load.json("sprites", "sprite-physics.json");
 
@@ -17,22 +18,18 @@ class Pinball extends Phaser.Scene {
 		board.setScale(1.5)
 		
 		this.createWalls()
-	
-		const spritePhysics = this.cache.json.get("sprites");
 		
-		this.paddles = newPaddles(this, spritePhysics.paddle)
+		this.paddles = newPaddles(this)
 		this.ball = newBall(this)
-		
-		// this.matter.alignBody(this.paddles.left, pos.paddleCenter.x - 120, 400, Phaser.Display.Align.LEFT_CENTER);
 	}
 	update () {
 		this.updatePaddles()
 	}
 	
 	createWalls () {
-		this.matter.add.rectangle(pos.center.x, h, w, 10, { isStatic: true })
-		this.matter.add.rectangle(0, h/2, 10, h, { isStatic: true })
-		this.matter.add.rectangle(w, h/2, 10, h, { isStatic: true })
+		this.matter.add.rectangle(pos.center.x, h, w, 30, { isStatic: true })
+		this.matter.add.rectangle(0, h/2, 30, h, { isStatic: true })
+		this.matter.add.rectangle(w, h/2, 30, h, { isStatic: true })
 	}
 
 	updatePaddles(input=this.input.keyboard, paddles=this.paddles) {
@@ -43,21 +40,19 @@ class Pinball extends Phaser.Scene {
 			event.key == "ArrowLeft" ? paddles.leftFired = false : 
 			event.key == "ArrowRight" ? paddles.rightFired = false : null)
 		
-		if (paddles.leftFired ) { paddles.fire.left() } 
-		if (paddles.rightFired) { paddles.fire.right() }
+		if (paddles.leftFired ) paddles.fire.left() 
+		if (paddles.rightFired ) paddles.fire.right()
+
+		if ( paddles.left.angle <= -30) paddles.leftFired ? 
+			paddles.left.setAngularVelocity(0) : // button held
+			paddles.left.setAngularVelocity(0.1) // button released
 		
-		if (paddles.left.angle == 160){
-			paddles.left.setAngularVelocity(0.2)
-		}
-		if (paddles.left.angle > -160 && paddles.left.angle < 0){
-			paddles.left.setAngularVelocity(0)
-		}	
-		if (paddles.right.angle == 30){
-			paddles.right.setAngularVelocity(-0.25)
-		}
-		if (paddles.right.angle < -20 ){
-			paddles.right.setAngularVelocity(0)
-		}
+		if ( paddles.right.angle >= 30) paddles.rightFired ? 
+			paddles.right.setAngularVelocity(0) : // button held
+			paddles.right.setAngularVelocity(-0.1) // button released
+
+		if ( paddles.right.angle <= -20 ) paddles.right.angle = -20 // bottom limit
+		if ( paddles.left.angle >= 20 ) paddles.left.angle = 20 // bottom limit
 	}
 }
 
@@ -98,36 +93,35 @@ function newBall(scene) {
 	const ball = scene.matter.add.image(
 		pos.launch.x, pos.launch.y, 'ball'
 	);
-	ball.setScale(0.35);
-	ball.setCircle(15);
+	ball.setScale(0.25);
+	ball.setCircle(18);
 	ball.setBounce(0.75);
 	ball.setVelocity(-6.5, -20);
 	return this.ball
 }
 
-function newPaddles(scene, shape, center = pos.paddleCenter) {
-
-	function fire(paddle, max, direction) {
-		paddle.setAngle(max)
-		// paddle.setAngularVelocity(0.5 * direction)
-	}
+function newPaddles(scene, center = pos.paddleCenter) {
+	const spritePhysics = scene.cache.json.get("sprites");
+	const leftCollision = spritePhysics["paddleLeft"]
+	const rightCollision = spritePhysics["paddleRight"]
+	
+	function fire(paddle, direction) { paddle.setAngularVelocity(0.2 * direction) }
 
 	const paddles = {
-		left: scene.matter.add.sprite(0, 0, 'paddle', null, { shape }),
-		right: scene.matter.add.sprite(0, 0, 'paddle', null, { shape }),
+		left: scene.matter.add.sprite(0, 0, 'paddleLeft', null, { shape: leftCollision }),
+		right: scene.matter.add.sprite(0, 0, 'paddleRight', null, { shape: rightCollision }),
 		apply: (func) => { func(paddles.left); func(paddles.right) },
-		fire: {left: () => fire(paddles.left, 160, -1), right: () => fire(paddles.right, 30, 1)},
+		fire: {left: () => fire(paddles.left, -1), right: () => fire(paddles.right, 1)},
 		leftFired: false,
 		rightFired: false
 	}
 
-	paddles.apply((paddle) => paddle.setScale(0.50))
-	paddles.apply((paddle) => paddle.setMass(10))
-	
+	paddles.apply((paddle) => paddle.setScale(0.4))
+	paddles.apply((paddle) => paddle.setMass(1))
 
-	const paddleOptions = { damping: 1.0}
-	const leftOptions = { pointA: { x: center.x - 120, y: center.y}, ...paddleOptions}
-	const rightOptions = {  pointA: { x: center.x + 120, y: center.y}, ...paddleOptions}
+	const options = { spread: 260, matter: {} }
+	const leftOptions = { pointA: { x: center.x - options.spread/2, y: center.y}, ...options.matter}
+	const rightOptions = {  pointA: { x: center.x + options.spread/2, y: center.y}, ...options.matter}
 	scene.matter.add.worldConstraint(paddles.left, 0, 1.0, leftOptions)
 	scene.matter.add.worldConstraint(paddles.right, 0, 1.0, rightOptions)
 	return paddles
