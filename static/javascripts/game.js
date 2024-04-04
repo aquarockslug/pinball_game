@@ -26,7 +26,7 @@ class Pinball extends Phaser.Scene {
 		// this.matter.world.runner.deltaMax = 2 
 		// this.matter.world.runner.correction = 1 
 		// this.matter.world.runner.deltaMin = 1 
-		this.matter.world.setGravity(0, 1, 0.0015);
+		this.matter.world.setGravity(0, 1, 0.001);
 		
 		this.paddles = newPaddles(this)
 		this.ball = newBall(this)
@@ -34,6 +34,9 @@ class Pinball extends Phaser.Scene {
 	update () {
 		this.updatePaddles()
 
+		// ball shrinks when higher on screen
+		this.ball.setScale(this.mapVal(this.ball.body.position.y, 500, 100, 0.4, 0.28))
+		
 		// ball y velocity clamp
 		if ( this.ball.body.velocity.y < -15 ) { this.ball.setVelocityY(-15) }
 		if ( this.ball.body.velocity.y > 15 ) { this.ball.setVelocityY(15) }
@@ -43,14 +46,14 @@ class Pinball extends Phaser.Scene {
 		this.ball.setVelocityX(3)
 		this.input.keyboard.on('keydown', (event) => 
 			event.key == "ArrowUp" && this.ball.body.position.x > 600 ? 
-				this.ball.setVelocity(-3, -20) : null)
+				this.ball.setVelocity(-3, -35) : null)
 	}
 	
 	createWalls () {
 		this.matter.add.rectangle(400, h - 80, 700, 50, { isStatic: true, angle: Math.PI + Math.PI / 60 })
 		this.matter.add.rectangle(400, 40, 400, 50, { isStatic: true })
-		this.matter.add.rectangle(pos.board.x - 280, pos.board.y, 50, h, { isStatic: true, angle: Math.PI / 16 })
-		this.matter.add.rectangle(pos.board.x + 280, pos.board.y, 50, h, { isStatic: true, angle: -Math.PI / 16 })
+		this.matter.add.rectangle(pos.board.x - 265, pos.board.y, 20, h, { isStatic: true, angle: Math.PI / 16 })
+		this.matter.add.rectangle(pos.board.x + 265, pos.board.y, 20, h, { isStatic: true, angle: -Math.PI / 16 })
 	}
 
 	updatePaddles(input=this.input.keyboard, paddles=this.paddles) {
@@ -64,16 +67,20 @@ class Pinball extends Phaser.Scene {
 		if (paddles.leftFired ) paddles.fire.left() 
 		if (paddles.rightFired ) paddles.fire.right()
 
-		if ( paddles.left.angle <= -10) paddles.leftFired ? 
+		if ( paddles.left.angle <= -15) paddles.leftFired ? 
 			paddles.left.setAngularVelocity(0) : // button held
 			paddles.left.setAngularVelocity(0.1) // button released
 		
-		if ( paddles.right.angle >= 10) paddles.rightFired ? 
+		if ( paddles.right.angle >= 15) paddles.rightFired ? 
 			paddles.right.setAngularVelocity(0) : // button held
 			paddles.right.setAngularVelocity(-0.1) // button released
 
-		if ( paddles.right.angle <= -18 ) paddles.right.angle = -18 // bottom limit
-		if ( paddles.left.angle >= 18 ) paddles.left.angle = 18 // bottom limit
+		if ( paddles.right.angle <= -20 ) paddles.right.angle = -20 // bottom limit
+		if ( paddles.left.angle >= 20 ) paddles.left.angle = 20 // bottom limit
+	}
+	
+	mapVal(value, x1, y1, x2, y2) {
+		return (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 	}
 }
 
@@ -89,7 +96,7 @@ const config = {
 		default: "matter",
 		matter: {
 			timing: {
-				timeScale: 2 
+				timeScale: 1.5 
 			},
 			// debug: true
 		}
@@ -117,14 +124,14 @@ function newBall(scene) {
 	);
 	ball.setScale(0.4);
 	ball.setCircle(25);
-	ball.setBounce(0.4);
-	ball.setVelocity(-7, -20);
+	ball.setBounce(0.5);
+	ball.setVelocity(-7, -22);
 	return ball
 }
 
 function newPaddles(scene, center = pos.paddleCenter) {
 	const spritePhysics = scene.cache.json.get("sprites");
-	function fire(paddle, direction) { paddle.setAngularVelocity(0.1 * direction) }
+	function fire(paddle, direction) { paddle.setAngularVelocity(0.15 * direction) }
 
 	const paddles = {
 		left: scene.matter.add.sprite(0, 0, 'paddleLeft', null, { shape: spritePhysics["paddleLeft"]
@@ -136,9 +143,9 @@ function newPaddles(scene, center = pos.paddleCenter) {
 		rightFired: false
 	}
 
-	paddles.apply((paddle) => paddle.setScale(0.55))
+	paddles.apply((paddle) => paddle.setScale(0.5))
 
-	const options = { spread: 370, matter: {} }
+	const options = { spread: 345, matter: {} }
 	const leftOptions = { pointA: { x: center.x - options.spread/2, y: center.y}, ...options.matter}
 	const rightOptions = {  pointA: { x: center.x + options.spread/2, y: center.y}, ...options.matter}
 	scene.matter.add.worldConstraint(paddles.left, 0, 1.0, leftOptions)
