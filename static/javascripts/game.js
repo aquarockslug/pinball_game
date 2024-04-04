@@ -19,6 +19,15 @@ class Pinball extends Phaser.Scene {
 		
 		this.createWalls()
 		
+		this.matter.world.engine.positionIterations = 12 
+		this.matter.world.engine.velocityIterations = 8
+		this.matter.world.runner.isFixed = true 
+		// this.matter.world.runner.deltaMax = 2 
+		// this.matter.world.runner.correction = 100 
+		// this.matter.world.runner.deltaMin = 1 
+      			
+		this.matter.world.setGravity(0, 1, 0.001);
+		
 		this.paddles = newPaddles(this)
 		this.ball = newBall(this)
 	}
@@ -51,8 +60,8 @@ class Pinball extends Phaser.Scene {
 			paddles.right.setAngularVelocity(0) : // button held
 			paddles.right.setAngularVelocity(-0.1) // button released
 
-		if ( paddles.right.angle <= -20 ) paddles.right.angle = -20 // bottom limit
-		if ( paddles.left.angle >= 20 ) paddles.left.angle = 20 // bottom limit
+		if ( paddles.right.angle <= -10 ) paddles.right.angle = -10 // bottom limit
+		if ( paddles.left.angle >= 10 ) paddles.left.angle = 10 // bottom limit
 	}
 }
 
@@ -68,6 +77,9 @@ const config = {
 	physics: {
 		default: "matter",
 		matter: {
+			timing: {
+				timeScale: 2 
+			},
 			debug: true
 		}
 	},
@@ -93,10 +105,11 @@ function newBall(scene) {
 	const ball = scene.matter.add.image(
 		pos.launch.x, pos.launch.y, 'ball'
 	);
-	ball.setScale(0.25);
+	ball.setScale(0.35);
 	ball.setCircle(18);
-	ball.setBounce(0.75);
-	ball.setVelocity(-6.5, -20);
+	ball.setBounce(0.4);
+	ball.setVelocity(-6, -20);
+	// ball.setMass(0.05)
 	return this.ball
 }
 
@@ -105,7 +118,7 @@ function newPaddles(scene, center = pos.paddleCenter) {
 	const leftCollision = spritePhysics["paddleLeft"]
 	const rightCollision = spritePhysics["paddleRight"]
 	
-	function fire(paddle, direction) { paddle.setAngularVelocity(0.2 * direction) }
+	function fire(paddle, direction) { paddle.setAngularVelocity(0.1 * direction) }
 
 	const paddles = {
 		left: scene.matter.add.sprite(0, 0, 'paddleLeft', null, { shape: leftCollision }),
@@ -116,10 +129,10 @@ function newPaddles(scene, center = pos.paddleCenter) {
 		rightFired: false
 	}
 
-	paddles.apply((paddle) => paddle.setScale(0.4))
-	paddles.apply((paddle) => paddle.setMass(1))
+	paddles.apply((paddle) => paddle.setScale(0.5))
+	// paddles.apply((paddle) => paddle.setMass(1))
 
-	const options = { spread: 260, matter: {} }
+	const options = { spread: 330, matter: {} }
 	const leftOptions = { pointA: { x: center.x - options.spread/2, y: center.y}, ...options.matter}
 	const rightOptions = {  pointA: { x: center.x + options.spread/2, y: center.y}, ...options.matter}
 	scene.matter.add.worldConstraint(paddles.left, 0, 1.0, leftOptions)
