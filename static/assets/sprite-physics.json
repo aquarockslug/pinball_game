@@ -124,5 +124,31 @@
 				}
 			}
 		]
+	},
+	"bumper_oval": {
+		"type": "fromPhysicsEditor",
+		"label": "bumper_oval",
+		"isStatic": false,
+		"density": 0.1,
+		"restitution": 1,
+		"friction": 0.10000000149011612,
+		"frictionAir": 0.009999999776482582,
+		"frictionStatic": 0.5,
+		"collisionFilter": {
+			"group": 0,
+			"category": 1,
+			"mask": 255
+		},
+		"fixtures": [
+			{
+				"label": "",
+				"isSensor": false,
+				"vertices": [
+					[ { "x":108, "y":40 }, { "x":100, "y":30 }, { "x":53, "y":12 }, { "x":17, "y":72 }, { "x":40, "y":83 }, { "x":72, "y":83 }, { "x":99, "y":68 }, { "x":108, "y":52 } ],
+					[ { "x":1, "y":44 }, { "x":7, "y":60 }, { "x":17, "y":72 }, { "x":53, "y":12 }, { "x":32, "y":15 }, { "x":16, "y":22 }, { "x":6, "y":31 } ],
+					[ { "x":53, "y":12 }, { "x":100, "y":30 }, { "x":90, "y":22 }, { "x":72, "y":15 } ]
+				]
+			}
+		]
 	}
 }

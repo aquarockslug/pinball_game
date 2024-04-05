@@ -10,6 +10,8 @@ class Pinball extends Phaser.Scene {
 		this.load.image('ball', 'silver_ball.png');
 		this.load.image('paddleRight', 'paddleRight.png');
 		this.load.image('paddleLeft', 'paddleLeft.png');
+		this.load.image('bumper', 'bumper_oval.png');
+		this.load.image('shade', 'shade.png');
 
 		this.load.json("sprites", "sprite-physics.json");
 
@@ -17,8 +19,14 @@ class Pinball extends Phaser.Scene {
 	create() {
 		this.add.image(pos.center.x, pos.center.y, 'sky').setScale(1.75)
 		this.add.image(pos.center.x, pos.center.y, 'board');
+		this.add.image(pos.center.x, pos.center.y, 'shade').setDepth(100)
 		
 		this.createWalls()
+		
+		const bumperSpread = 250 
+		this.createBumper(pos.board.x, pos.board.y-225, 0.4)
+		this.createBumper(pos.board.x+bumperSpread/2, pos.board.y-125, 0.5)
+		this.createBumper(pos.board.x-bumperSpread/2, pos.board.y-125, 0.5)
 		
 		this.matter.world.engine.positionIterations = 12 
 		this.matter.world.engine.velocityIterations = 8
@@ -26,7 +34,7 @@ class Pinball extends Phaser.Scene {
 		// this.matter.world.runner.deltaMax = 2 
 		// this.matter.world.runner.correction = 1 
 		// this.matter.world.runner.deltaMin = 1 
-		this.matter.world.setGravity(0, 1, 0.001);
+		// this.matter.world.setGravity(0, 1, 0.001);
 		
 		this.paddles = newPaddles(this)
 		this.ball = newBall(this)
@@ -36,24 +44,40 @@ class Pinball extends Phaser.Scene {
 
 		// ball shrinks when higher on screen
 		this.ball.setScale(this.mapVal(this.ball.body.position.y, 500, 100, 0.4, 0.28))
-		
+
 		// ball y velocity clamp
-		if ( this.ball.body.velocity.y < -15 ) { this.ball.setVelocityY(-15) }
-		if ( this.ball.body.velocity.y > 15 ) { this.ball.setVelocityY(15) }
+		if ( this.ball.body.velocity.y < -14 ) { this.ball.setVelocityY(-14) }
+		if ( this.ball.body.velocity.y > 14 ) { this.ball.setVelocityY(14) }
+
+		if ( this.ball.body.velocity.x < -14 ) { this.ball.setVelocityX(-14) }
+		if ( this.ball.body.velocity.x > 14 ) { this.ball.setVelocityX(14) }
 
 		// ball return
 		if ( this.ball.body.position.y < 570) return
-		this.ball.setVelocityX(3)
+		this.ball.setVelocityX(5)
 		this.input.keyboard.on('keydown', (event) => 
 			event.key == "ArrowUp" && this.ball.body.position.x > 600 ? 
-				this.ball.setVelocity(-3, -35) : null)
+				this.ball.setVelocity(-6, -40) : null)
 	}
 	
 	createWalls () {
-		this.matter.add.rectangle(400, h - 80, 700, 50, { isStatic: true, angle: Math.PI + Math.PI / 60 })
+		const wallSpread = 575
+		this.matter.add.rectangle(400, h - 80, 700, 50, 
+			{ isStatic: true, angle: Math.PI + Math.PI / 60 })
 		this.matter.add.rectangle(400, 40, 400, 50, { isStatic: true })
-		this.matter.add.rectangle(pos.board.x - 265, pos.board.y, 20, h, { isStatic: true, angle: Math.PI / 16 })
-		this.matter.add.rectangle(pos.board.x + 265, pos.board.y, 20, h, { isStatic: true, angle: -Math.PI / 16 })
+		this.matter.add.rectangle(pos.board.x - wallSpread/2, pos.board.y, 50, h, 
+			{ isStatic: true, angle: Math.PI / 16 })
+		this.matter.add.rectangle(pos.board.x + wallSpread/2, pos.board.y, 50, h, 
+			{ isStatic: true, angle: -Math.PI / 16 })
+	}
+
+	createBumper(x, y, scale) {
+		const spritePhysics = this.cache.json.get("sprites");
+		const bumper = this.matter.add.sprite(x, y, 'bumper', null, 
+			{ shape: spritePhysics["bumper_oval"] })
+		bumper.setDepth(50).setScale(scale)
+		bumper.setStatic(true).setBounce(1.0);
+		return bumper
 	}
 
 	updatePaddles(input=this.input.keyboard, paddles=this.paddles) {
@@ -67,11 +91,11 @@ class Pinball extends Phaser.Scene {
 		if (paddles.leftFired ) paddles.fire.left() 
 		if (paddles.rightFired ) paddles.fire.right()
 
-		if ( paddles.left.angle <= -15) paddles.leftFired ? 
+		if ( paddles.left.angle <= -10) paddles.leftFired ? 
 			paddles.left.setAngularVelocity(0) : // button held
 			paddles.left.setAngularVelocity(0.1) // button released
 		
-		if ( paddles.right.angle >= 15) paddles.rightFired ? 
+		if ( paddles.right.angle >= 10) paddles.rightFired ? 
 			paddles.right.setAngularVelocity(0) : // button held
 			paddles.right.setAngularVelocity(-0.1) // button released
 
@@ -96,9 +120,9 @@ const config = {
 		default: "matter",
 		matter: {
 			timing: {
-				timeScale: 1.5 
+				timeScale: 2.0 
 			},
-			// debug: true
+			debug: true
 		}
 	},
 	plugins: {
@@ -113,20 +137,14 @@ const config = {
 const [w, h] = [config.width, config.height]
 pos = {
 	center: { x: w / 2, y: h / 2 },
-	launch: { x: w / 2, y:  h / 2},
+	launch: { x: 670, y:  600},
 	paddleCenter: { x: 395, y: h / 2 + 100 },
 	board: { x: 395, y: h / 2}
 }
 
 function newBall(scene) {
-	const ball = scene.matter.add.image(
-		pos.launch.x, pos.launch.y, 'ball'
-	);
-	ball.setScale(0.4);
-	ball.setCircle(25);
-	ball.setBounce(0.5);
-	ball.setVelocity(-7, -22);
-	return ball
+	const ball = scene.matter.add.image(pos.launch.x, pos.launch.y, 'ball');
+	return ball.setScale(0.4).setCircle(24).setBounce(0.5);
 }
 
 function newPaddles(scene, center = pos.paddleCenter) {
@@ -134,9 +152,10 @@ function newPaddles(scene, center = pos.paddleCenter) {
 	function fire(paddle, direction) { paddle.setAngularVelocity(0.15 * direction) }
 
 	const paddles = {
-		left: scene.matter.add.sprite(0, 0, 'paddleLeft', null, { shape: spritePhysics["paddleLeft"]
- }),
-		right: scene.matter.add.sprite(0, 0, 'paddleRight', null, { shape: spritePhysics["paddleRight"] }),
+		left: scene.matter.add.sprite(0, 0, 'paddleLeft', null, 
+			{ shape: spritePhysics["paddleLeft"] }),
+		right: scene.matter.add.sprite(0, 0, 'paddleRight', null, 
+			{ shape: spritePhysics["paddleRight"] }),
 		apply: (func) => { func(paddles.left); func(paddles.right) },
 		fire: {left: () => fire(paddles.left, -1), right: () => fire(paddles.right, 1)},
 		leftFired: false,
@@ -144,6 +163,7 @@ function newPaddles(scene, center = pos.paddleCenter) {
 	}
 
 	paddles.apply((paddle) => paddle.setScale(0.5))
+	paddles.apply((paddle) => paddle.setFriction(0.0))
 
 	const options = { spread: 345, matter: {} }
 	const leftOptions = { pointA: { x: center.x - options.spread/2, y: center.y}, ...options.matter}
