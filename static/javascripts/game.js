@@ -57,11 +57,11 @@ class Pinball extends Phaser.Scene {
 		this.ball.setVelocityX(5)
 		this.input.keyboard.on('keydown', (event) => 
 			event.key == "ArrowUp" && this.ball.body.position.x > 600 ? 
-				this.ball.setVelocity(-6, -40) : null)
+				this.ball.setVelocity(-3, -40) : null)
 	}
 	
 	createWalls () {
-		const wallSpread = 575
+		const wallSpread = 580
 		this.matter.add.rectangle(400, h - 80, 700, 50, 
 			{ isStatic: true, angle: Math.PI + Math.PI / 60 })
 		this.matter.add.rectangle(400, 40, 400, 50, { isStatic: true })
@@ -120,9 +120,9 @@ const config = {
 		default: "matter",
 		matter: {
 			timing: {
-				timeScale: 2.0 
+				timeScale: 1.5 
 			},
-			debug: true
+			// debug: true
 		}
 	},
 	plugins: {
