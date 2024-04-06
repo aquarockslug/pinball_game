@@ -4,29 +4,23 @@ class Pinball extends Phaser.Scene {
 
 	preload() {
 		this.load.setBaseURL('assets/');
-
-		this.load.image('sky', 'sky.png');
-		this.load.image('board', 'board.png');
-		this.load.image('ball', 'silver_ball.png');
-		this.load.image('paddleRight', 'paddleRight.png');
-		this.load.image('paddleLeft', 'paddleLeft.png');
-		this.load.image('bumper', 'bumper_oval.png');
-		this.load.image('shade', 'shade.png');
-
+		[['sky', 'sky.png'], ['board', 'board.png'], ['ball', 'silver_ball.png'],
+		['bumper', 'bumper_oval.png'], ['shade', 'shade.png'], 
+		['paddleLeft', 'paddleLeft.png'], ['paddleRight', 'paddleRight.png']
+		].forEach((asset) => this.load.image(asset[0], asset[1]))
 		this.load.json("sprites", "sprite-physics.json");
-
 	}
+
 	create() {
 		this.add.image(pos.center.x, pos.center.y, 'sky').setScale(1.75)
 		this.add.image(pos.center.x, pos.center.y, 'board');
 		this.add.image(pos.center.x, pos.center.y, 'shade').setDepth(100)
-		
 		this.createWalls()
 		
-		const bumperSpread = 250 
-		this.createBumper(pos.board.x, pos.board.y-225, 0.4)
-		this.createBumper(pos.board.x+bumperSpread/2, pos.board.y-125, 0.5)
-		this.createBumper(pos.board.x-bumperSpread/2, pos.board.y-125, 0.5)
+		const spread = 250 
+		this.newBumper(pos.board.x, pos.board.y-225, 0.4)
+		this.newBumper(pos.board.x+spread/2, pos.board.y-spread/2, 0.5)
+		this.newBumper(pos.board.x-spread/2, pos.board.y-spread/2, 0.5)
 		
 		this.matter.world.engine.positionIterations = 12 
 		this.matter.world.engine.velocityIterations = 8
@@ -39,16 +33,16 @@ class Pinball extends Phaser.Scene {
 		this.paddles = newPaddles(this)
 		this.ball = newBall(this)
 	}
+
 	update () {
 		this.updatePaddles()
 
 		// ball shrinks when higher on screen
 		this.ball.setScale(this.mapVal(this.ball.body.position.y, 500, 100, 0.4, 0.28))
 
-		// ball y velocity clamp
+		// ball velocity clamp
 		if ( this.ball.body.velocity.y < -14 ) { this.ball.setVelocityY(-14) }
 		if ( this.ball.body.velocity.y > 14 ) { this.ball.setVelocityY(14) }
-
 		if ( this.ball.body.velocity.x < -14 ) { this.ball.setVelocityX(-14) }
 		if ( this.ball.body.velocity.x > 14 ) { this.ball.setVelocityX(14) }
 
@@ -71,13 +65,12 @@ class Pinball extends Phaser.Scene {
 			{ isStatic: true, angle: -Math.PI / 16 })
 	}
 
-	createBumper(x, y, scale) {
+	newBumper(x, y, scale) {
 		const spritePhysics = this.cache.json.get("sprites");
 		const bumper = this.matter.add.sprite(x, y, 'bumper', null, 
 			{ shape: spritePhysics["bumper_oval"] })
 		bumper.setDepth(50).setScale(scale)
-		bumper.setStatic(true).setBounce(1.0);
-		return bumper
+		return bumper.setStatic(true).setBounce(1.0);
 	}
 
 	updatePaddles(input=this.input.keyboard, paddles=this.paddles) {
