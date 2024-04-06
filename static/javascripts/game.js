@@ -16,11 +16,7 @@ class Pinball extends Phaser.Scene {
 		this.add.image(pos.center.x, pos.center.y, 'board');
 		this.add.image(pos.center.x, pos.center.y, 'shade').setDepth(100)
 		this.createWalls()
-		
-		const spread = 250 
-		this.newBumper(pos.board.x, pos.board.y-225, 0.4)
-		this.newBumper(pos.board.x+spread/2, pos.board.y-spread/2, 0.5)
-		this.newBumper(pos.board.x-spread/2, pos.board.y-spread/2, 0.5)
+		this.createBumpers()
 		
 		this.matter.world.engine.positionIterations = 12 
 		this.matter.world.engine.velocityIterations = 8
@@ -63,6 +59,12 @@ class Pinball extends Phaser.Scene {
 			{ isStatic: true, angle: Math.PI / 16 })
 		this.matter.add.rectangle(pos.board.x + wallSpread/2, pos.board.y, 50, h, 
 			{ isStatic: true, angle: -Math.PI / 16 })
+	}
+
+	createBumpers(spread=250) {
+		this.newBumper(pos.board.x, pos.board.y-225, 0.4)
+		this.newBumper(pos.board.x+spread/2, pos.board.y-spread/2, 0.5)
+		this.newBumper(pos.board.x-spread/2, pos.board.y-spread/2, 0.5)
 	}
 
 	newBumper(x, y, scale) {
