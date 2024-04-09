@@ -1,8 +1,8 @@
 {
 	"generator_info": "Shape definitions generated with PhysicsEditor. Visit https://www.codeandweb.com/physicseditor",
-	"slingshot": {
+	"slingshotRight": {
 		"type": "fromPhysicsEditor",
-		"label": "slingshot",
+		"label": "slingshotRight",
 		"isStatic": true,
 		"density": 0.1,
 		"restitution": 0,
@@ -147,6 +147,32 @@
 					[ { "x":107, "y":48 }, { "x":96, "y":34 }, { "x":82, "y":23 }, { "x":68, "y":16 }, { "x":72, "y":83 }, { "x":83, "y":78 }, { "x":93, "y":71 }, { "x":101, "y":63 } ],
 					[ { "x":2, "y":47 }, { "x":7, "y":60 }, { "x":17, "y":72 }, { "x":28, "y":78 }, { "x":55, "y":13 }, { "x":40, "y":16 }, { "x":26, "y":23 }, { "x":12, "y":33 } ],
 					[ { "x":28, "y":78 }, { "x":40, "y":82 }, { "x":72, "y":83 }, { "x":68, "y":16 }, { "x":55, "y":13 } ]
+				]
+			}
+		]
+	},
+	"slingshotLeft": {
+		"type": "fromPhysicsEditor",
+		"label": "slingshotLeft",
+		"isStatic": true,
+		"density": 0.1,
+		"restitution": 0,
+		"friction": 0.10000000149011612,
+		"frictionAir": 0.009999999776482582,
+		"frictionStatic": 0.5,
+		"collisionFilter": {
+			"group": 0,
+			"category": 1,
+			"mask": 255
+		},
+		"fixtures": [
+			{
+				"label": "",
+				"isSensor": false,
+				"vertices": [
+					[ { "x":188, "y":301 }, { "x":195, "y":296 }, { "x":197, "y":291 }, { "x":197, "y":276 }, { "x":44, "y":9 }, { "x":1, "y":165 }, { "x":41, "y":255 }, { "x":176, "y":300 } ],
+					[ { "x":16, "y":0 }, { "x":6, "y":5 }, { "x":1, "y":11 }, { "x":1, "y":165 }, { "x":44, "y":9 }, { "x":39, "y":4 }, { "x":31, "y":1 } ],
+					[ { "x":8, "y":232 }, { "x":17, "y":242 }, { "x":41, "y":255 }, { "x":1, "y":165 }, { "x":2, "y":217 } ]
 				]
 			}
 		]
